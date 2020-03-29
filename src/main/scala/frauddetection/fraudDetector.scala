@@ -27,29 +27,14 @@ import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer
 
 object fraudDetector {
 
-  case class Config(
+  case class KafkaConfig(
                    topic: String = "clicks",
                    servers: String = "localhost:9092",
                    group: String = "test"
                    )
 
   def main(args: Array[String]): Unit = {
-
-//    val parser = new OptionParser[Config]("scopt") {
-//      opt[String]('t', "topic").action((x, c) => c.copy(topic = x)).text("Topic to listen to")
-//      opt[String]('s', "servers").action((x, c) => c.copy(servers = x)).text("Kafka bootstrap servers")
-//      opt[String]('g', "group").action((x, c) => c.copy(servers = x)).text("Group id of the Kafka consumer")
-//    }
-//
-//    parser.parse(args, Config()) match {
-//      case Some(config) =>
-//        new KafkaConsumer(config)
-//
-//      case None =>
-//        println("Bad arguments")
-//    }
-
-    println("Hello !")
+    println("Hello Flink!")
 
     // setup flink web server config
     val conf: Configuration = new Configuration();
@@ -57,15 +42,12 @@ object fraudDetector {
     val env = StreamExecutionEnvironment.createLocalEnvironment(2, conf)
 
     val properties = new Properties()
-    properties.setProperty("bootstrap.servers", Config().servers)
-    properties.setProperty("group.id", Config().group)
+    properties.setProperty("bootstrap.servers", KafkaConfig().servers)
+    properties.setProperty("group.id", KafkaConfig().group)
 
     env
-      .addSource(new FlinkKafkaConsumer[String](Config().topic, new SimpleStringSchema(), properties))
+      .addSource(new FlinkKafkaConsumer[String](KafkaConfig().topic, new SimpleStringSchema(), properties))
       .print()
     env.execute("Flink Scala Kafka Consumer")
-
-
-
   }
 }

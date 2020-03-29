@@ -18,24 +18,54 @@
 
 package frauddetection
 
-import org.apache.flink.api.scala._
-import org.apache.flink.table.api.scala._
-import org.apache.flink.walkthrough.common.table._
+import java.util.Properties
+
+import org.apache.flink.api.common.serialization.SimpleStringSchema
+import org.apache.flink.configuration.{ConfigConstants, Configuration, RestOptions}
+import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment
+import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer
 
 object fraudDetector {
+
+  case class Config(
+                   topic: String = "clicks",
+                   servers: String = "localhost:9092",
+                   group: String = "test"
+                   )
+
   def main(args: Array[String]): Unit = {
-    val env = ExecutionEnvironment.getExecutionEnvironment
-    val tEnv = BatchTableEnvironment.create(env)
 
-    tEnv.registerTableSource("transactions", new BoundedTransactionTableSource)
-    tEnv.registerTableSink("spend_report", new SpendReportTableSink)
+//    val parser = new OptionParser[Config]("scopt") {
+//      opt[String]('t', "topic").action((x, c) => c.copy(topic = x)).text("Topic to listen to")
+//      opt[String]('s', "servers").action((x, c) => c.copy(servers = x)).text("Kafka bootstrap servers")
+//      opt[String]('g', "group").action((x, c) => c.copy(servers = x)).text("Group id of the Kafka consumer")
+//    }
+//
+//    parser.parse(args, Config()) match {
+//      case Some(config) =>
+//        new KafkaConsumer(config)
+//
+//      case None =>
+//        println("Bad arguments")
+//    }
 
-    val truncateDateToHour = new TruncateDateToHour
+    println("Hello !")
 
-    tEnv
-      .scan("transactions")
-      .insertInto("spend_report")
+    // setup flink web server config
+    val conf: Configuration = new Configuration();
+    conf.setInteger(RestOptions.PORT, 8082);
+    val env = StreamExecutionEnvironment.createLocalEnvironment(2, conf)
 
-    env.execute("Spend Report")
+    val properties = new Properties()
+    properties.setProperty("bootstrap.servers", Config().servers)
+    properties.setProperty("group.id", Config().group)
+
+    env
+      .addSource(new FlinkKafkaConsumer[String](Config().topic, new SimpleStringSchema(), properties))
+      .print()
+    env.execute("Flink Scala Kafka Consumer")
+
+
+
   }
 }

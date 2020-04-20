@@ -58,8 +58,8 @@ object fraudDetector {
       kafkaConsumerProperties
     )
     val lines = env.addSource(kafkaConsumer)
-    val tweets: DataStream[Event] = lines.map(Event(_))
-    tweets.print()
+    val events: DataStream[Event] = lines.map(Event(_))
+    events.print()
     env.execute()
 
 

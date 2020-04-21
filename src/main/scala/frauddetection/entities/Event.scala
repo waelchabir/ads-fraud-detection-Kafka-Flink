@@ -1,4 +1,4 @@
-package frauddetection.entity
+package frauddetection.entities
 
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.node.ObjectNode
 

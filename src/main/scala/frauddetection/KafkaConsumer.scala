@@ -1,7 +1,0 @@
-package frauddetection
-
-
-
-class KafkaConsumer() {
-
-}

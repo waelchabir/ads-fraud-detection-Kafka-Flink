@@ -18,10 +18,8 @@
 
 package frauddetection
 
-import java.util.Properties
-
-import frauddetection.entity.Event
-import org.apache.flink.configuration.{Configuration, RestOptions}
+import frauddetection.entities.Event
+import frauddetection.services.{KafkaService, StreamService}
 import org.apache.flink.streaming.api.scala._
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer010
 import org.apache.flink.streaming.util.serialization.JSONKeyValueDeserializationSchema
@@ -32,37 +30,15 @@ import scala.util.Try
 
 object fraudDetector {
 
-  case class KafkaConfig(
-                   topic: String = "displays",
-                   servers: String = "localhost:9092",
-                   group: String = "Fraud Detection"
-                   )
-
   def main(args: Array[String]): Unit = {
 
-    def initKafkaConsumer() = {
-      val props = new Properties()
-      props.setProperty("bootstrap.servers", KafkaConfig().servers)
-      props.setProperty("group.id", KafkaConfig().group)
-      props
-    }
-
-    def initFlinkEnv(isWebUiEnabled: Boolean, numberExecutorNodes: Int =2):StreamExecutionEnvironment = {
-      val conf: Configuration = new Configuration()
-      if (isWebUiEnabled) {
-        conf.setInteger(RestOptions.PORT, 8082)
-      }
-      val env = StreamExecutionEnvironment.createLocalEnvironment(numberExecutorNodes, conf)
-      env
-    }
-
-    val env = initFlinkEnv(true)
+    val env = StreamService().initFlinkEnv(true)
     env.getConfig.disableClosureCleaner()
 
-    val kafkaConsumerProperties = initKafkaConsumer()
+    val kafkaConsumerProperties = KafkaService().initKafkaConsumer()
 
     val kafkaConsumer = new FlinkKafkaConsumer010(
-      List(KafkaConfig().topic).asJava,
+      List(KafkaService().topic).asJava,
       new JSONKeyValueDeserializationSchema(true),
       kafkaConsumerProperties
     )
@@ -71,31 +47,5 @@ object fraudDetector {
     val uids = events.map(_.get.uid).name("Extract UID")
     uids.print()
     env.execute()
-
-
-//    // setup flink web server config
-//    val conf: Configuration = new Configuration()
-//    conf.setInteger(RestOptions.PORT, 8082)
-//
-//    val env = StreamExecutionEnvironment.createLocalEnvironment(2, conf)
-//
-//    // set kafka properties
-//    val properties = new Properties()
-//    properties.setProperty("bootstrap.servers", KafkaConfig().servers)
-//    properties.setProperty("group.id", KafkaConfig().group)
-//
-//    val kafkaConsumer = new FlinkKafkaConsumer[ObjectNode](
-//      KafkaConfig().topic,
-//      new JSONKeyValueDeserializationSchema(false),
-//      properties
-//    )
-//
-//    val clicksInputStream = env
-//      .addSource(kafkaConsumer)
-//      .name("Kafka-stream")
-//
-//    clicksInputStream.print()
-//
-//    env.execute("Flink Scala Kafka Consumer")
   }
 }

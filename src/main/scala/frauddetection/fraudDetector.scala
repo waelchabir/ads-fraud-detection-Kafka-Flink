@@ -21,12 +21,13 @@ package frauddetection
 import java.util.Properties
 
 import frauddetection.entity.Event
-import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment
-import org.apache.flink.streaming.api.scala.DataStream
+import org.apache.flink.configuration.{Configuration, RestOptions}
+import org.apache.flink.streaming.api.scala._
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer010
 import org.apache.flink.streaming.util.serialization.JSONKeyValueDeserializationSchema
 
 import scala.collection.JavaConverters._
+import scala.util.Try
 
 
 object fraudDetector {
@@ -34,20 +35,28 @@ object fraudDetector {
   case class KafkaConfig(
                    topic: String = "displays",
                    servers: String = "localhost:9092",
-                   group: String = "test"
+                   group: String = "Fraud Detection"
                    )
 
   def main(args: Array[String]): Unit = {
 
     def initKafkaConsumer() = {
       val props = new Properties()
-      props.setProperty("bootstrap.servers", "localhost:9092")
-      props.setProperty("zookeeper.connect", "localhost:32181")
-      props.setProperty("group.id", "flink")
+      props.setProperty("bootstrap.servers", KafkaConfig().servers)
+      props.setProperty("group.id", KafkaConfig().group)
       props
     }
 
-    val env = StreamExecutionEnvironment.getExecutionEnvironment
+    def initFlinkEnv(isWebUiEnabled: Boolean, numberExecutorNodes: Int =2):StreamExecutionEnvironment = {
+      val conf: Configuration = new Configuration()
+      if (isWebUiEnabled) {
+        conf.setInteger(RestOptions.PORT, 8082)
+      }
+      val env = StreamExecutionEnvironment.createLocalEnvironment(numberExecutorNodes, conf)
+      env
+    }
+
+    val env = initFlinkEnv(true)
     env.getConfig.disableClosureCleaner()
 
     val kafkaConsumerProperties = initKafkaConsumer()
@@ -58,8 +67,9 @@ object fraudDetector {
       kafkaConsumerProperties
     )
     val lines = env.addSource(kafkaConsumer)
-    val events: DataStream[Event] = lines.map(Event(_))
-    events.print()
+    val events: DataStream[Try[Event]] = lines.map(Event(_)).name("Events Mapping")
+    val uids = events.map(_.get.uid).name("Extract UID")
+    uids.print()
     env.execute()
 
 

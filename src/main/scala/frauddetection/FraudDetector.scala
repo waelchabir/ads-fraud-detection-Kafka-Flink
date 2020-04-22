@@ -45,10 +45,10 @@ object FraudDetector {
     val displays: DataStream[Try[Event]] = displaysSource.map(Event(_)).name("Displays events Mapping")
 
     val clicks_uids = clicks.map("clicks: "+_.get.uid).name("Clicks Extract UID")
-    val dislays_uids = displays.map("displays: "+_.get.uid).name("Displays Extract UID")
+    val displays_uids = displays.map("displays: "+_.get.uid).name("Displays Extract UID")
 
     clicks_uids.print()
-    dislays_uids.print()
+    displays_uids.print()
 
     env.execute()
   }

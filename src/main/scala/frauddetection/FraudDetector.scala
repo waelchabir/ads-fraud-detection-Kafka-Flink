@@ -19,33 +19,37 @@
 package frauddetection
 
 import frauddetection.entities.Event
-import frauddetection.services.{KafkaService, StreamService}
+import frauddetection.services.{FlinkService, KafkaService}
 import org.apache.flink.streaming.api.scala._
-import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer010
-import org.apache.flink.streaming.util.serialization.JSONKeyValueDeserializationSchema
 
-import scala.collection.JavaConverters._
 import scala.util.Try
 
 
 object FraudDetector {
 
+  val CLICKS_TOPIC ="clicks"
+  val DISPLAYS_TOPIC ="displays"
+
   def main(args: Array[String]): Unit = {
 
-    val env = StreamService().initFlinkEnv(true)
+    val env = FlinkService().initFlinkEnv(enableWebGui = true)
     env.getConfig.disableClosureCleaner()
 
-    val kafkaConsumerProperties = KafkaService().initKafkaConsumer()
+    val clicksKafkaService = KafkaService(topic = CLICKS_TOPIC)
+    val displaysKafkaService = KafkaService(topic = DISPLAYS_TOPIC)
 
-    val kafkaConsumer = new FlinkKafkaConsumer010(
-      List(KafkaService().topic).asJava,
-      new JSONKeyValueDeserializationSchema(true),
-      kafkaConsumerProperties
-    )
-    val lines = env.addSource(kafkaConsumer)
-    val events: DataStream[Try[Event]] = lines.map(Event(_)).name("Events Mapping")
-    val uids = events.map(_.get.uid).name("Extract UID")
-    uids.print()
+    val clicksSource = env.addSource(FlinkService().establishKafkaConnection(clicksKafkaService)).name("Creating Clicks source")
+    val displaysSource = env.addSource(FlinkService().establishKafkaConnection(displaysKafkaService)).name("Creating Displays source")
+
+    val clicks: DataStream[Try[Event]] = clicksSource.map(Event(_)).name("Clicks events Mapping")
+    val displays: DataStream[Try[Event]] = displaysSource.map(Event(_)).name("Displays events Mapping")
+
+    val clicks_uids = clicks.map("clicks: "+_.get.uid).name("Clicks Extract UID")
+    val dislays_uids = displays.map("displays: "+_.get.uid).name("Displays Extract UID")
+
+    clicks_uids.print()
+    dislays_uids.print()
+
     env.execute()
   }
 }

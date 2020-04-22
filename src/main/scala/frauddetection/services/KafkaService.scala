@@ -3,7 +3,7 @@ package frauddetection.services
 import java.util.Properties
 
 case class KafkaService(
-                         topic: String = "displays",
+                         topic: String,
                          servers: String = "localhost:9092",
                          group: String = "Fraud Detection"
                        )

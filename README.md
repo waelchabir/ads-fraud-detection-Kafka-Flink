@@ -1,0 +1,4 @@
+# Ads fraud detection using Kafka and Flink
+ The goal of the project is to:
+ Markup: *
+ create a Flink application which will read from Kafka clicks and displays, detect some suspicious/fraudulent activities and output the suspicious events into a file.  Please download and run this docker-compose file : https://github.com/Sabmit/paris-dauphine/blob/master/docker/kafka-zk/docker-compose.yml To run it, simply execute `docker-compose rm -f; docker-compose up` in the same directory as the docker-compose.yml file.   By running this docker-compose, it will :      Create a Kafka cluster with two topics : “clicks” and “displays”     Launch a python script which will send events to those two topics and display them in the terminal   This generator simulates few suspicious/fraudulent patterns that you should detect using Flink.  There are 3 distincts patterns we want you to find.

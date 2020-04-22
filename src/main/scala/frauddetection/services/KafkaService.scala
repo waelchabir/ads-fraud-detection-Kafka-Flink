@@ -2,8 +2,6 @@ package frauddetection.services
 
 import java.util.Properties
 
-import frauddetection.fraudDetector.KafkaConfig
-
 case class KafkaService(
                          topic: String = "displays",
                          servers: String = "localhost:9092",

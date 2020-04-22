@@ -28,7 +28,7 @@ import scala.collection.JavaConverters._
 import scala.util.Try
 
 
-object fraudDetector {
+object FraudDetector {
 
   def main(args: Array[String]): Unit = {
 

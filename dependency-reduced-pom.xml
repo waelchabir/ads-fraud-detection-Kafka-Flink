@@ -38,7 +38,7 @@
               </filters>
               <transformers>
                 <transformer>
-                  <mainClass>frauddetection.fraudDetector</mainClass>
+                  <mainClass>frauddetection.FraudDetector</mainClass>
                 </transformer>
               </transformers>
             </configuration>

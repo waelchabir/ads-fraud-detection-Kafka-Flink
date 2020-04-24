@@ -4,7 +4,11 @@ import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.node.Obje
 
 import scala.util.Try
 
-case class Event(eventType: String, uid: String, timestamp: Long, ip: String, impressionId: String)
+case class Event(eventType: String,
+                 uid: String,
+                 timestamp: Long,
+                 ip: String,
+                 impressionId: String)
 
 object Event {
   def apply(obj: ObjectNode): Event = {

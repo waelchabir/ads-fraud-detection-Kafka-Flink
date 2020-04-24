@@ -23,15 +23,25 @@ object FirstFilter {
       .map(Event(_))
       .name("Clicks events Mapping")
 
-    val xx = clicks.assignTimestampsAndWatermarks(TimestampExtractor)
-      .map { (_, 1) }
-      .keyBy(_._1.ip)
-      .window(TumblingEventTimeWindows.of(Time.seconds(1)))
-//      .window(SlidingEventTimeWindows.of(Time.seconds(100), Time.seconds(100)))
-//      .timeWindow(Time.seconds(5), Time.seconds(1))
+    val fraudClicks = clicks
+      .assignTimestampsAndWatermarks(TimestampExtractor)
+      .map{(_,1)}
+      .keyBy(d => (d._1.timestamp, d._1.ip))
       .sum(1)
-      .filter{a => (a._2 >= 5)}
+      .filter(_._2 >= 5)
+      .name("Fraud clicks detector")
 
-    xx.print()
+    fraudClicks.print()
+
+//    val xx = clicks.assignTimestampsAndWatermarks(TimestampExtractor)
+//      .map { (_, 1) }
+//      .keyBy(_._1.ip)
+//      .window(TumblingEventTimeWindows.of(Time.seconds(1)))
+////      .window(SlidingEventTimeWindows.of(Time.seconds(100), Time.seconds(100)))
+////      .timeWindow(Time.seconds(5), Time.seconds(1))
+//      .sum(1)
+//      .filter{a => (a._2 >= 5)}
+
+//    xx.print()
   }
 }

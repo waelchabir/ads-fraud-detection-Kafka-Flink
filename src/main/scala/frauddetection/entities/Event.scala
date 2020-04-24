@@ -7,8 +7,7 @@ import scala.util.Try
 case class Event(eventType: String, uid: String, timestamp: Long, ip: String, impressionId: String)
 
 object Event {
-  def apply(obj: ObjectNode): Try[Event] = {
-    Try({
+  def apply(obj: ObjectNode): Event = {
       val eventType = obj.findValue("eventType").asText()
       val uid = obj.findValue("uid").asText()
       val timestamp = obj.findValue("timestamp").asLong()
@@ -16,6 +15,5 @@ object Event {
       val impressionId = obj.findValue("impressionId").asText()
 
       Event(eventType, uid, timestamp, ip, impressionId)
-    })
   }
 }

@@ -18,38 +18,24 @@
 
 package frauddetection
 
-import frauddetection.entities.Event
-import frauddetection.services.{FlinkService, KafkaService}
-import org.apache.flink.streaming.api.scala._
-
-import scala.util.Try
+import frauddetection.jobs.{FirstFilter, __TestFilter}
+import frauddetection.services.FlinkService
+import org.apache.flink.streaming.api.TimeCharacteristic
 
 
 object FraudDetector {
 
-  val CLICKS_TOPIC ="clicks"
-  val DISPLAYS_TOPIC ="displays"
-
   def main(args: Array[String]): Unit = {
-
+    // set up the execution environment
     val env = FlinkService().initFlinkEnv(enableWebGui = true)
     env.getConfig.disableClosureCleaner()
+    env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime)
 
-    val clicksKafkaService = KafkaService(topic = CLICKS_TOPIC)
-    val displaysKafkaService = KafkaService(topic = DISPLAYS_TOPIC)
+    // start jobs
+    FirstFilter.build(env)
+//    __TestFilter.run()
 
-    val clicksSource = env.addSource(FlinkService().establishKafkaConnection(clicksKafkaService)).name("Creating Clicks source")
-    val displaysSource = env.addSource(FlinkService().establishKafkaConnection(displaysKafkaService)).name("Creating Displays source")
-
-    val clicks: DataStream[Try[Event]] = clicksSource.map(Event(_)).name("Clicks events Mapping")
-    val displays: DataStream[Try[Event]] = displaysSource.map(Event(_)).name("Displays events Mapping")
-
-    val clicks_uids = clicks.map("clicks: "+_.get.uid).name("Clicks Extract UID")
-    val displays_uids = displays.map("displays: "+_.get.uid).name("Displays Extract UID")
-
-    clicks_uids.print()
-    displays_uids.print()
-
+    // execute the environment
     env.execute()
   }
 }

@@ -2,7 +2,7 @@
 - - - - 
  The goal of the project is to:
 
- * Create a Flink application which will read from Kafka clicks and displays
+ * Create a Flink application which will read from Kafka `clicks` and `displays` queues
  * Detect some suspicious/fraudulent activities 
  * Output the suspicious events into a file.  
  

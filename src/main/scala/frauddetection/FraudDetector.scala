@@ -33,7 +33,7 @@ object FraudDetector {
 
     // start jobs
     FirstFilter.build(env)
-//    __TestFilter.run()
+//    __TestFilter.runOnStream(env)
 
     // execute the environment
     env.execute()

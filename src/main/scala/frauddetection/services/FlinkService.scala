@@ -1,8 +1,9 @@
 package frauddetection.services
 
+import frauddetection.entities.Event
 import org.apache.flink.configuration.{Configuration, RestOptions}
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.node.ObjectNode
-import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
+import org.apache.flink.streaming.api.scala._
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer010
 import org.apache.flink.streaming.util.serialization.JSONKeyValueDeserializationSchema
 
@@ -17,6 +18,16 @@ case class FlinkService(webUiPort: Int = 8082) {
     }
     val env = StreamExecutionEnvironment.createLocalEnvironment(numberExecutorNodes, conf)
     env
+  }
+}
+
+object FlinkService {
+  def addSource(environment: StreamExecutionEnvironment, kafkaService: KafkaService): DataStream[Event] = {
+    val source = environment
+      .addSource(establishKafkaConnection(kafkaService))
+      .map(Event(_))
+      .name("Creating Clicks source")
+    source
   }
 
   def establishKafkaConnection(kafkaService: KafkaService): FlinkKafkaConsumer010[ObjectNode] = {

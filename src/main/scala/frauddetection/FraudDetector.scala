@@ -19,7 +19,7 @@
 package frauddetection
 
 import frauddetection.constants.BrokerConstants
-import frauddetection.jobs.{FirstFilter, SecondFilter}
+import frauddetection.jobs.{FirstFilter, SecondFilter, ThirdFilter}
 import frauddetection.services.{FlinkService, KafkaService}
 import org.apache.flink.streaming.api.TimeCharacteristic
 
@@ -30,14 +30,18 @@ object FraudDetector {
     // set up the execution environment
     val env = FlinkService().initFlinkEnv(enableWebGui = true)
     env.getConfig.disableClosureCleaner()
-    env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime)
+    env.setStreamTimeCharacteristic(TimeCharacteristic.IngestionTime)
 
     // add sources to the environment
     val clicksKafkaService = KafkaService(topic= BrokerConstants.getClicksTopicName())
+    val displaysKafkaService = KafkaService(topic= BrokerConstants.getDisplayTopicName())
     val clicks = FlinkService.addSource(env, clicksKafkaService)
+    val displays = FlinkService.addSource(env, displaysKafkaService)
 
     // start jobs
+    FirstFilter.build(clicks)
     SecondFilter.build(clicks)
+    ThirdFilter.build(clicks, displays, 5000, 300)
 
     // execute the environment
     env.execute()

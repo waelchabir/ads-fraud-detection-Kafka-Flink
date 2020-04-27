@@ -21,7 +21,7 @@ object FirstFilter {
       .sum(1)
       .filter(_._2 >= 5)
       .map(_._1)
-      .name("Fraud clicks detector")
+      .name("1st filter - Fraud detector")
 
     fraudClicks.print()
 

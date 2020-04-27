@@ -32,17 +32,21 @@ object SecondFilter {
             (feedback, output)
           }
         )
+      .name("2nd filter - Fraud detector")
+
     fraudClicks.print()
   }
 
   class RaiseAlertFlatMap extends CoFlatMapFunction[EventSorter, EventSorter, EventSorter] {
-    var oldValidEvents: List[EventSorter] = _
+    var oldValidEvents: List[EventSorter] = List[EventSorter]()
 
     // new_events handler (EventSorter.flag = 0)
     override def flatMap1(value: EventSorter, out: Collector[EventSorter]): Unit = {
       var fraudulentEvent = false
-      for (ove <- oldValidEvents) {
-        if (value.impressionId == ove.impressionId && value.ip != ove.ip) fraudulentEvent = true
+      if ( !oldValidEvents.isEmpty) {
+        for (ove <- oldValidEvents) {
+          if (value.impressionId == ove.impressionId && value.ip != ove.ip) fraudulentEvent = true
+        }
       }
       if (fraudulentEvent) out.collect(value)
       else out.collect(EventSorter(value.impressionId, value.ip, 1))

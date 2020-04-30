@@ -6,10 +6,9 @@
  * Detect some suspicious/fraudulent activities 
  * Output the suspicious events into a file.  
  
- ## Setting up project ##
- Please download and run this docker-compose file : https://github.com/Sabmit/paris-dauphine/blob/master/docker/kafka-zk/docker-compose.yml 
- 
- To run it, simply execute these lines in the same directory as the docker-compose.yml file:  
+ ## Setting up project ## 
+ Please get into the docker folder and run the docker-compose file.<br />
+ To do so, simply execute these lines in the same directory as the docker-compose.yml file:  
  * `docker-compose rm -f` <br />
  * `docker-compose up`
  

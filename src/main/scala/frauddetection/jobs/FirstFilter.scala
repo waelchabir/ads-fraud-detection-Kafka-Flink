@@ -28,14 +28,3 @@ object FirstFilter {
     fraudClicks.writeAsText("output/filter1", FileSystem.WriteMode.OVERWRITE)
   }
 }
-
-//    val xx = clicks.assignTimestampsAndWatermarks(TimestampExtractor)
-//      .map { (_, 1) }
-//      .keyBy(_._1.ip)
-//      .window(TumblingEventTimeWindows.of(Time.seconds(1)))
-////      .window(SlidingEventTimeWindows.of(Time.seconds(100), Time.seconds(100)))
-////      .timeWindow(Time.seconds(5), Time.seconds(1))
-//      .sum(1)
-//      .filter{a => (a._2 >= 5)}
-
-//    xx.print()

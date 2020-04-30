@@ -1,5 +1,6 @@
 # Ads fraud detection using Kafka and Flink #
 - - - - 
+ ## Project goals ## 
  The goal of the project is to:
 
  * Create a Flink application which will read from Kafka `clicks` and `displays` queues

@@ -2,7 +2,9 @@ package frauddetection.jobs
 
 import frauddetection.entities.Event
 import frauddetection.utils.TimestampExtractor
+import org.apache.flink.core.fs.FileSystem
 import org.apache.flink.streaming.api.scala._
+import org.apache.flink.streaming.api.functions.sink.filesystem.StreamingFileSink
 
 
 case class FirstFilter()
@@ -23,7 +25,9 @@ object FirstFilter {
       .map(_._1)
       .name("1st filter - Fraud detector")
 
-    fraudClicks.print()
+    fraudClicks.writeAsText("output/filter1", FileSystem.WriteMode.OVERWRITE)
+  }
+}
 
 //    val xx = clicks.assignTimestampsAndWatermarks(TimestampExtractor)
 //      .map { (_, 1) }
@@ -35,5 +39,3 @@ object FirstFilter {
 //      .filter{a => (a._2 >= 5)}
 
 //    xx.print()
-  }
-}

@@ -1,6 +1,7 @@
 package frauddetection.jobs
 
 import frauddetection.entities.{Event, Transaction}
+import org.apache.flink.core.fs.FileSystem
 import org.apache.flink.streaming.api.scala._
 import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows
 import org.apache.flink.streaming.api.windowing.time.Time
@@ -19,8 +20,10 @@ object ThirdFilter {
             windowSize: Int,
             toleranceInterval: Int): Unit = {
     val joined = joinStreams(clicksStream, displaysStream, windowSize)
-    val fraudulentClicks = joined.filter(t => t.click.timestamp < (t.display.timestamp - toleranceInterval))
-    fraudulentClicks.print()
+    val fraudClicks = joined
+      .filter(t => t.click.timestamp < (t.display.timestamp - toleranceInterval))
+      .name("3rd filter - Fraud detector")
+    fraudClicks.writeAsText("output/filter3", FileSystem.WriteMode.OVERWRITE)
   }
 
   def joinStreams(

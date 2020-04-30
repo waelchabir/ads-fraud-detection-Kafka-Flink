@@ -1,7 +1,7 @@
 package frauddetection.jobs
 
 import frauddetection.entities.{Event, EventSorter}
-import frauddetection.utils.TimestampExtractor
+import org.apache.flink.core.fs.FileSystem
 import org.apache.flink.streaming.api.functions.co.CoFlatMapFunction
 import org.apache.flink.streaming.api.scala._
 import org.apache.flink.util.Collector
@@ -34,7 +34,7 @@ object SecondFilter {
         )
       .name("2nd filter - Fraud detector")
 
-    fraudClicks.print()
+    fraudClicks.writeAsText("output/filter2", FileSystem.WriteMode.OVERWRITE)
   }
 
   class RaiseAlertFlatMap extends CoFlatMapFunction[EventSorter, EventSorter, EventSorter] {
